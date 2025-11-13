@@ -1,0 +1,67 @@
+---
+title: "p8105_hw5_jt3649"
+author: "Juan Tang"
+date: "2025-11-12"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(purrr)
+library(ggplot2)
+set.seed(1)
+```
+
+### Problem 1
+```{r shared_birthday}
+birthday_sim = function(n_people){
+  birthdays = sample(1:365, size = n_people, replace = TRUE) #draw n_people birthdays, each between 1 and 365
+  any(duplicated(birthdays)) # return true if any birthday appears more than once
+}
+```
+
+```{r group_size_2_to_50}
+n_sims = 10000 # number of simulations
+birthday_results = 
+  tibble(n = 2:50) |>
+  mutate(
+    # for each n, do 10000 independent simulations
+    sim_results = map(
+      n, 
+      ~ replicate(n_sims, birthday_sim(.x))
+    )
+  ) |>
+  # turn the logical vectors into long format
+  unnest_longer(sim_results, values_to = "shared_birthday") |>
+  group_by(n) |>
+  summarize(
+    prob_shared = mean(shared_birthday), # "TRUE" = 1, "FALSE" = 0"
+    .groups = "drop"
+  )
+head(birthday_results)
+```
+
+```{r birthday_plot}
+birthday_results |>
+  ggplot(aes(x = n, y = prob_shared)) + 
+  geom_line() + 
+  geom_point() + 
+  labs(
+    x = "Group size(n)", 
+    y = "Probability of at least two share a brithday", 
+    title = "Probabilty of shared birthday vs group size"
+  )
+```
+
+#### Comment
+- When the group sizes are small, the probability of two shared the same birthday is close to 0. 
+
+- The probability increases as n increases, and is above 0.5 when n is approx. 23. 
+
+- For relatively larger groups (close to 50), the probability of shared birthday approaches 1, indicating it is extremely likely that at least two people share a birthday. 
+
+### Problem 2
+```{r}
+
+```
+
