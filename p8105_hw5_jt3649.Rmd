@@ -160,3 +160,133 @@ ggplot(
 
 mu_hat_results
 ```
+
+Is the sample average of 𝜇̂ across tests for which the null is rejected approximately equal to the true value of 𝜇? Why or why not?
+
+
+### Problem 3
+```{r read dataset}
+homicides_raw = 
+  read_csv("homicide-data.csv")
+```
+
+#### Description of dataset
+The raw dataset contains one row per homicide case. There are `r nrow(homicides_raw)` observations, and `r ncol(homicides_raw)` variables.
+
+Important variables include: 
+- `uid`: case ID
+- `reported_date`: date the homicide was reported
+- `city`, `state`: location of the homicide
+- `victim_last`,`victim_first`, `victim_race`, `victim_age`, `victim_sex`: demographic information of the victim
+- `disposition`: case status
+
+#### Homicides by city_state
+```{r homicide by city_state}
+homicides_city = 
+  homicides_raw |>
+  # create city_state variable
+  mutate(
+    city_state = str_c(city, ",", state), 
+    # indicator for unsolved cases ("closed without arrest" or "open/no arrest")
+    unsolved = if_else(
+      disposition %in% c("Closed without arrest", "Open/No arrest"), 
+      1, # unsolved
+      0, # solved
+    )
+  ) |>
+  group_by(city_state) |>
+  summarize(
+    n_homicides = n(), # total number of homicides in city
+    n_unsolved = sum(unsolved), # number of unsolved homicides
+  )
+
+homicides_city
+```
+
+#### Unsolved homicides in Baltimore, MD
+```{r homicides in Baltimore,MD}
+baltimore = homicides_city |>
+  filter(city_state == "Baltimore,MD")
+baltimore
+
+# run prop.test for Baltimore
+baltimore_prop = 
+  prop.test(
+    x = baltimore$n_unsolved, # number of unsolved cases
+    n = baltimore$n_homicides # total number of cases
+  )
+
+# tidy the output
+baltimore_tidy = 
+  baltimore_prop |>
+  broom::tidy()
+
+# extract estimated prop. and CI
+baltimore_estimate = 
+  baltimore_tidy |>
+  select(estimate, conf.low, conf.high)
+
+baltimore_estimate
+```
+
+The estimated proportion of homicides that are unsolved in Baltimore,MD is `r baltimore_estimate$estimate`. 
+
+The 95% confidence interval is (`r baltimore_estimate$conf.low`, `r baltimore_estimate$conf.high`)
+
+#### Proportion of unsolved homicides in all cities
+```{r prop test for all cities}
+city_prop_results = 
+  homicides_city |>
+  mutate(
+    # list col of prop.test objects
+    prop_test = map2(
+      n_unsolved, 
+      n_homicides, 
+      ~ prop.test(x = .x, n = .y)
+    ), 
+    # list col of tidy data frames
+    prop_tidy = map(prop_test, broom::tidy)
+  ) |>
+  unnest(prop_tidy) |>
+  select(
+    city_state, 
+    n_homicides, 
+    n_unsolved, 
+    estimate, 
+    conf.low, 
+    conf.high
+  )
+
+city_prop_results
+```
+
+#### Proportion of unsolved homicides plot
+```{r prop. plot by city}
+city_prop_results |>
+  # organize cities according to the proportion of unsolved homicides
+  mutate(
+    city_state = fct_reorder(city_state, estimate)
+  ) |>
+  ggplot(
+    aes(x = estimate, 
+        y = city_state)
+    ) + 
+      geom_point() + 
+      # add errorbar based on 95% CI
+      geom_errorbar(
+        aes(xmin = conf.low, 
+            xmax = conf.high), 
+        width = 0
+    )+ 
+      labs(
+        title = "Estimated Proportion of Unsolved Homicides by City", 
+        x = "Estimated proportion unsolved (95% CI)", 
+        y = "City"
+      ) 
+```
+
+
+
+
+
+
