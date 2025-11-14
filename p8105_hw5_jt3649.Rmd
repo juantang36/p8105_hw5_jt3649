@@ -163,6 +163,9 @@ mu_hat_results
 
 Is the sample average of 𝜇̂ across tests for which the null is rejected approximately equal to the true value of 𝜇? Why or why not?
 
+- No. The sample avg of 𝜇̂ among simulations where H0 is rejected does not approx. equal to the true value of mu due to selection bias.
+- When power is low (true mu is small), only samples with unusually large mu-hat lead to rejection of H0. So, the conditional mean is biased upward. 
+- As mu increases and power approaches 1, nearly all samples reject, so the bias decreases and the conditional mean appraoches the true mu. 
 
 ### Problem 3
 ```{r read dataset}
