@@ -98,7 +98,12 @@ power_results =
     .groups = "drop" 
   )
 
-power_results
+power_results |>
+  knitr::kable(
+    caption = "Power Estimates for Each True Mean (mu)", 
+    digits = 3, 
+    align = "c"
+  )
 ```
 
 ```{r power_vs_mu_plot}
@@ -158,7 +163,7 @@ ggplot(
     title = "Average Estimate of mu-hat vs true mu"
   )
 
-mu_hat_results
+knitr::kable(mu_hat_results)
 ```
 
 Is the sample average of 𝜇̂ across tests for which the null is rejected approximately equal to the true value of 𝜇? Why or why not?
@@ -203,7 +208,7 @@ homicides_city =
     n_unsolved = sum(unsolved), # number of unsolved homicides
   )
 
-homicides_city
+knitr::kable(homicides_city)
 ```
 
 #### Unsolved homicides in Baltimore, MD
@@ -229,7 +234,7 @@ baltimore_estimate =
   baltimore_tidy |>
   select(estimate, conf.low, conf.high)
 
-baltimore_estimate
+knitr::kable(baltimore_estimate)
 ```
 
 The estimated proportion of homicides that are unsolved in Baltimore,MD is `r baltimore_estimate$estimate`. 
@@ -260,7 +265,7 @@ city_prop_results =
     conf.high
   )
 
-city_prop_results
+knitr::kable(city_prop_results)
 ```
 
 #### Proportion of unsolved homicides plot
