@@ -38,7 +38,7 @@ birthday_results =
     prob_shared = mean(shared_birthday), # "TRUE" = 1, "FALSE" = 0"
     .groups = "drop"
   )
-head(birthday_results)
+knitr::kable(head(birthday_results))
 ```
 
 ```{r birthday_plot}
@@ -118,6 +118,10 @@ ggplot(power_results, aes(x = mu, y = power)) +
   ylim(0, 1) # range, power is between 0 and 1
 ```
 
+Describe the association between effect size and power.
+
+The plot shows a strong positive relationship between effect size and power. As the effect size increases, the probability of rejecting the null hypothesis when it is false also increases. This is because larger effect size leads to larger t-statistic, which move the distribution of the sample mean further away from the null value. More extreme t-values will result in more rejections and increasing the power. 
+
 #### mu-hat Result
 ```{r mu_hat_results}
 mu_hat_results =
@@ -183,9 +187,13 @@ The raw dataset contains one row per homicide case. There are `r nrow(homicides_
 
 Important variables include: 
 - `uid`: case ID
+
 - `reported_date`: date the homicide was reported
+
 - `city`, `state`: location of the homicide
+
 - `victim_last`,`victim_first`, `victim_race`, `victim_age`, `victim_sex`: demographic information of the victim
+
 - `disposition`: case status
 
 #### Homicides by city_state
